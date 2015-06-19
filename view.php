@@ -42,5 +42,7 @@
 						<?php endwhile; ?>
 				</div>
 			</div>
+			<a href="index.php" class="btn btn-danger">Volver</a>
+		</div>
 	</body>
 </html>

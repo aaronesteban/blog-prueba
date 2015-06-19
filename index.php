@@ -43,11 +43,8 @@
 				<?php endwhile; ?>
 
 			</div>
-
+			<a href="insertar.php" class="btn btn-danger">Añadir Artículo</a>
 		</div>
 	</div>
-
-
-
 </body>
 </html>
