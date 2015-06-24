@@ -1,7 +1,11 @@
 <?php
 	include "base-datos.php";
-	$temp = new blog();
+	$bd = new blog();
 	$posts = $_GET;
+	if (!empty($posts)) {
+		$bd->insertar($posts);
+	}
+	$tema = $bd->gettemas();
 ?>
 <!DOCTYPE HTML>
 <html>
@@ -10,12 +14,23 @@
         <title>Insertar artículo</title>
             <!-- Bootstrap core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/blog.css" rel="stylesheet">
+    		<!-- ckeditor -->
+    <script type="text/javascript" src="ckeditor/ckeditor.js"></script>
+ 
     </head>
 	<body>
 		<div class="container">
 			<form action="insertar.php" method="get">
 				<div class="row">
 					<br/> <br/>
+					<br/> <br/>
+					<label for="titulo">Tema: </label>
+					<select name="tema_id">
+						<?php while($fila = $tema->fetch_assoc()): ?>
+						<option value="<?=$fila['id']?>"> <?=$fila['nombre']?> </option>
+						<?php endwhile; ?> 
+					</select >
 					<br/> <br/>
 					<label for="titulo">Título: </label>
 					<input type="text" name="titulo" id="titulo">
@@ -24,20 +39,17 @@
 					<input type="text" name="subtitulo" id="subtitulo">
 					<br/> <br/>
 					<label for="texto">Texto: </label>
-					<input type="text" name="texto" id="texto">
+					<textarea cols="80" id="texto" name="texto" rows="10"></textarea>
+					<script type='text/javascript'>
+					window.onload = function(){
+					    CKEDITOR.replace('texto');
+					 };
+					</script>
 					<br/> <br/>
-	<!-- 				<label for="fecha">Fecha: </label>
-					<input type="date" name="fecha" id="fecha">
-					<br/> <br/> -->
 					<input type="submit" value="Enviar">
 					<input type="reset">
 				</div>
 			</form>
-			<?php
-			if (!empty($posts)) {
-				$temp->insertar($posts);
-			}
-			?>
 			<br/> <br/>
 			<a href="index.php" class="btn btn-danger">Volver a Inicio</a>
 		</div>

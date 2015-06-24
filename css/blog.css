@@ -1,0 +1,50 @@
+.row{
+	margin-top: 20px;
+}
+.blog-post{
+	width: 76%;
+	height: auto;
+	background-color: #E0E0E0;
+	margin-bottom: 30px;
+	padding: 20px 20px 30px 50px;
+	border-radius: 30px;
+}
+.boton{
+	text-align: right;
+} 
+.container{
+	background-color: #A0A0A0;
+}
+.container h1 {
+	color: #004C99;
+	margin-bottom: 40px;
+	margin-left: 100px;
+}
+.sidebar-module.sidebar-module-insert{
+	padding-right: 20px;
+	padding-top: 20px;
+	width: 91%;
+}
+.confirmacion{
+	margin-top: 20px;
+	padding-right: 2%;
+}
+.confirmacion span{
+	margin-right: 35px;
+	padding: 5px 5px;
+	background-color: lightblue;
+	border-radius: 30px;
+	padding: 5px 10px;
+	color: #000;
+}
+.insertar{
+	position: relative;
+}
+.insertar a{
+	position: absolute;
+	bottom: 40px;
+	right: 180px;
+}
+.sidebar-module{
+	margin-bottom: 20px;
+}
