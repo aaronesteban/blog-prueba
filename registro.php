@@ -3,8 +3,10 @@
 include_once "base-datos.php";
 $post = new blog();
 
-if (!empty($_POST)) {
-    $post->login ($_POST['usuario'],$_POST['password']);
+$registro = $_POST;
+if (!empty($registro))
+{
+    $post->registrarse ($registro);
 }
 
 ?>
@@ -17,18 +19,26 @@ if (!empty($_POST)) {
     </head>
     <body>
         <div class="container">
-            <form action="login.php" method="post">
+            <form action="registro.php" method="post">
                 <table class="login">
                     <tr>
+                        <td>Nombre:</td>
+                        <td><input name="nombre" required="required" type="text" value="<?if(!empty($_POST['nombre'])) echo $_POST['nombre']; ?>" /></td>
+                    </tr>
+                    <tr>
                         <td>Usuario:</td>
-                        <td><input name="usuario" required="required" type="text" /></td>
+                        <td><input name="usuario" required="required" type="text" value="<?if(!empty($_POST['usuario'])) echo $_POST['usuario']; ?>" /></td>
                     </tr>
                     <tr>
                         <td>Password:</td>
                         <td><input name="password" required="required" type="password" /></td> 
                     </tr>
                     <tr>
-                        <td colspan="2"><input name="iniciar" type="submit" value="Iniciar Sesión" /></td>
+                        <td>Confirme Password:</td>
+                        <td><input name="password1" required="required" type="password" /></td> 
+                    </tr>
+                    <tr>
+                        <td colspan="2"><input name="iniciar" type="submit" value="Registrarse" /></td>
                     </tr>
                 </table>
             </form>

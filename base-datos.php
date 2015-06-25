@@ -1,7 +1,8 @@
 <?php
 
-//CLASES
+session_start();
 
+//CLASES
 class blog
 {
 	public $bd;
@@ -17,7 +18,6 @@ class blog
 		{
 			die('Imposible conectar [' . $this->bd->connect_error . ']');
 		}
-
 
 
 	}
@@ -46,12 +46,17 @@ class blog
 
 	}
 
-	public function insertar($posts)
+	public function insertar($posts,$rutaweb,$nombre)
 	{
 
-		$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', '".$posts['tema_id']."')";
+		$sql2 = "INSERT INTO imagenes(nombre, ruta) VALUES ('$nombre', '$rutaweb')";
+		
+ 		$this->bd->query($sql2)
+ 		$imagen_id = $this->bd->insert_id;
 
-		if(! $this->bd->query($sql)){
+		$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id, imagen_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].", $imagen_id)";
+
+		if(! $this->bd->query($sql) || ! $this->bd->query($sql2)){
 		     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
 		}
 		header("Location: index.php");
@@ -145,16 +150,77 @@ class blog
 
 	}
 
-	/*public function login($usuario, $password)
+	public function busqueda($busqueda)
 	{
-		if ($usuario == 'aaron' && $password == 'aaronesteban') 
+		$sql = "SELECT posts.*, temas.nombre FROM posts LEFT JOIN temas ON posts.tema_id = temas.id WHERE texto LIKE '%$busqueda%' OR titulo LIKE '%$busqueda%' OR subtitulo LIKE '%$busqueda%' ORDER BY fecha DESC LIMIT 50";
+
+		if (!$resultado= $this->bd->query($sql)) 
 		{
-			session_start(oid)
+			die ('Ocurrio un error ejecutando el query ['. $this->bd->error.']');
+		}
+		return $resultado;
+
+	}
+
+	public function login($usuario, $password)
+	{
+		$sql = "SELECT * FROM users WHERE users.user = '$usuario' && users.password = '$password'";
+
+		if (!$resultado= $this->bd->query($sql)) 
+		{
+			die ('Ocurrio un error ejecutando el query ['. $this->bd->error.']');
+		}
+
+		if ($resultado->num_rows === 1) 
+		{
+			$user = $resultado->fetch_row();
+			$_SESSION['login'] = $user[3];
+			header("Location: index.php");
+			if ($usuario == 'aaron' && $password == 'aaronesteban') {
+				$_SESSION['login'] = $user[1];
+			}
 		}
 		else
 		{
-			echo "Usuario o contraseña incorrectos.";
+			unset($_SESSION['login']);
+			$_SESSION['msg'] = "Usuario o contraseña incorrectos.";
 		}
 	
-	}	 */
+	}
+
+	public function logout()
+	{
+
+		unset($_SESSION['login']);
+		header("Location: index.php");
+	}
+
+	public function isloged()
+	{
+		if (isset($_SESSION['login'])){
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	
+	}
+
+	public function registrarse($registro)
+	{
+
+		if ($registro['password'] !== $registro['password1']) {
+			$_SESSION['msg'] = "Las contraseñas no coinciden.";
+		}
+		else
+		{
+			$sql = "INSERT INTO users(nombre, user, password) VALUES ('".$registro['nombre']."','". $registro['usuario']."','".$registro['password']."')";
+
+			if(!$this->bd->query($sql)){
+			     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+			}
+			header("Location: index.php");
+		}
+	}
 }

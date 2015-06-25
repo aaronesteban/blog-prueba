@@ -1,13 +1,18 @@
 <?php
 	include "base-datos.php";
 	$post = new blog();
-
-	if (!empty($_POST)) {
- 		$post->modificar($_POST);
-	} else {
-		$post_id = $_GET['id'];
- 		$posts = $post->view($post_id);
- 		$tema = $post->gettemas();
+	if (!$post->isloged()) {
+		$_SESSION['msg'] = "No estás logueado";
+		header("Location: index.php");
+	}
+	else{
+		if (!empty($_POST)) {
+	 		$post->modificar($_POST);
+		} else {
+			$post_id = $_GET['id'];
+	 		$posts = $post->view($post_id);
+	 		$tema = $post->gettemas();
+		}
 	}
 	
 ?>
@@ -23,6 +28,7 @@
     </head>
 	<body>
 		<div class="container">
+			<a href="index.php"><h1>Blog con php y mySQL</h1></a>
 			<form action="modificar.php" method="post">
 				<div class="row">
 					<br/> <br/>
@@ -58,6 +64,7 @@
 						<input type="reset">
 					<?php endwhile; ?>
 				</div>
+				<?include "botones.php";?>
 			</form>
 			<br/> <br/>
 			<a href="index.php" class="btn btn-danger">Volver a Inicio</a>

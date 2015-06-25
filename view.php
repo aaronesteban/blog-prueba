@@ -23,7 +23,7 @@
 	<body>
 		<div class="container">
 
-			<h1>Blog</h1>
+			<a href="index.php"><h1>Blog con php y mySQL</h1></a>
 
 			<div class="row">
 
@@ -50,8 +50,9 @@
 								</div>
 						<?php endwhile; ?>
 				</div>
-				<a href="index.php" class="btn btn-danger">Volver</a>			
+				<a href="index.php" class="btn btn-danger">Volver a Inicio</a>			
 			</div>
+			<?include "botones.php";?>
 		</div>
 		<script type="text/javascript">
 			function mostrar(id){

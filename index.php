@@ -2,19 +2,20 @@
 	include	"base-datos.php";
 
 	$blog = new blog();
-	if (isset($_GET['fecha']) || isset($_GET['tema'])) {
+	if (isset($_GET['fecha']) || isset($_GET['tema']) || isset($_POST['busqueda'])) {
 		if (isset($_GET['fecha'])) {
 		$posts = $blog->listarfecha($_GET['fecha']);
 		}
-		if(isset($_GET['tema'])){
+		elseif(isset($_GET['tema'])){
 			$posts = $blog->listartema($_GET['tema']);
+		}
+		elseif(isset($_POST['busqueda'])){
+			$posts = $blog->busqueda($_POST['busqueda']);
 		}
 	}
 	else{
 		$posts = $blog->listar();
 	}
-	
-	
  ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -39,6 +40,20 @@
 
 		<a href="index.php"><h1>Blog con php y mySQL</h1></a>
 
+		<? if (isset($_SESSION['msg'])): ?>
+			<div class="alert alert-danger" role="alert"><?=$_SESSION['msg']?></div>
+			<? unset($_SESSION['msg']); ?>
+		<? endif; ?>
+
+		<div class="formulariobusqueda">
+			<FORM METHOD=POST ACTION="index.php"> 
+				<strong>Buscar: </strong><INPUT TYPE="text" NAME="busqueda" class="busqueda" value="<?if(!empty($_POST['busqueda'])) echo $_POST['busqueda']; ?>"> 
+			</FORM>
+			<?if ($posts->num_rows === 0): ?>
+				<span>No se ha encontrado ningún resultado.</span>
+			<?endif;?>
+		</div>
+		<span class="clear"></span>
 		<div class="row">
 
 			<div class="col-sm-8 blog-main">
@@ -54,21 +69,21 @@
 						<p class="blog-post-meta"><?=$blog->formatFecha($fila['fecha'])?></p>
 						<h3 class=""><?=$fila['subtitulo']?></h3>
 						<p><?=$fila['texto']?></p>
-						<div class="boton">
-							<a href="modificar.php?id=<?=$fila['id']?>" class="btn btn-warning">Editar post</a>
-							<a input type="button" class="btn btn-danger" value="Mostrar" onclick="mostrar(<?=$fila['id']?>)">Eliminar post</a>
-							<div id="confirmacion_<?=$fila['id']?>" class="confirmacion" style='display:none;'>
-								<span>¿Está seguro de que desea eliminar este post?</span>
-								<a href="eliminar.php?id=<?=$fila['id']?>" class="btn btn-danger">Si</a>
-								<a class="btn btn-warning" class ="no" onclick="ocultar(<?=$fila['id']?>)">No</a>
+						<? if(isset($_SESSION['login'])): ?>
+							<div class="boton">
+								<a href="modificar.php?id=<?=$fila['id']?>" class="btn btn-warning">Editar post</a>
+								<a input type="button" class="btn btn-danger" value="Mostrar" onclick="mostrar(<?=$fila['id']?>)">Eliminar post</a>
+								<div id="confirmacion_<?=$fila['id']?>" class="confirmacion" style='display:none;'>
+									<span>¿Está seguro de que desea eliminar este post?</span>
+									<a href="eliminar.php?id=<?=$fila['id']?>" class="btn btn-danger">Si</a>
+									<a class="btn btn-warning" class ="no" onclick="ocultar(<?=$fila['id']?>)">No</a>
+								</div>
 							</div>
-						</div>
+						<? endif; ?>
 					</div>
 				<?php endwhile; ?>
 	</div>
-	<div class="insertar">
-		<a href="insertar.php" class="btn btn-danger">Añadir Post</a>
-	</div>
+	<?include "botones.php";?>
 	<div class="col-sm-3 col-sm-offset-1 blog-sidebar">
 		<div class=" sidebar-module sidebar-module-insert">
 			<h4>Información</h4>

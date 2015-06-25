@@ -1,9 +1,26 @@
 <?php
 	include "base-datos.php";
 	$bd = new blog();
-	$posts = $_GET;
-	if (!empty($posts)) {
-		$bd->insertar($posts);
+	$rutaabsoluta = 'C:\xampp/htdocs/blog/img/';
+	$rutaweb = '/blog/img';
+
+	if (!$bd->isloged()) {
+		$_SESSION['msg'] = "No estás logueado";
+		header("Location: index.php");
+	}
+
+	$posts = $_POST;
+	if (!empty($posts)) 
+	{
+		if ($_FILES ['archivo']['error'] > 0) {
+			echo "Error:" .$_FILES ['archivo']['error'] ;	
+		}
+		else
+		{
+			$nombre = $_FILES['archivo']['name'];
+			move_uploaded_file($_FILES['archivo']['tmp_name'], $ruta .$nombre);
+			$bd->insertar($posts,$rutaweb,$nombre);
+		}
 	}
 	$tema = $bd->gettemas();
 ?>
@@ -21,7 +38,7 @@
     </head>
 	<body>
 		<div class="container">
-			<form action="insertar.php" method="get">
+			<form action="insertar.php" enctype="multipart/form-data" method="POST">
 				<div class="row">
 					<br/> <br/>
 					<br/> <br/>
@@ -45,6 +62,8 @@
 					    CKEDITOR.replace('texto');
 					 };
 					</script>
+					<br/> <br/>
+					<input type="file" name="archivo" id="archivo"></input>
 					<br/> <br/>
 					<input type="submit" value="Enviar">
 					<input type="reset">
