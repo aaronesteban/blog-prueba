@@ -33,6 +33,8 @@
     <link href="css/blog.css" rel="stylesheet">
     
 	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+	<script type="text/javascript" src="js/jquery.fancybox.pack.js"></script>  
+	<link rel="stylesheet" type="text/css" href="css/jquery.fancybox.css" />
 </head>
 
 <body>
@@ -71,7 +73,7 @@
 						<p><?=$fila['texto']?></p>
 						<?if (!empty($fila['nombre_img']) && !empty($fila['ruta'])): ?>
 							<div>
-								<img src="<?=$fila['ruta'].$fila['nombre_img'] ?>" height="100" width="150">
+								<a class="fancy" href="<?=$fila['ruta'].$fila['nombre_img'] ?>"><img src="<?=$fila['ruta'].$fila['nombre_img'] ?>" height="100" width="150"></a>
 							</div>
 						<?endif; ?>
 						<? if(isset($_SESSION['login'])): ?>
@@ -112,6 +114,10 @@
 		function ocultar(id){
 			document.getElementById('confirmacion_'+id).style.display = 'none';
 		}
+
+		$(document).ready(function(){  
+    	$(".fancy").fancybox({ });  
+		});    
 	</script>
 </body>
 </html>

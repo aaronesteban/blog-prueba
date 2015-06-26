@@ -18,6 +18,9 @@
 	    <!-- Bootstrap core CSS -->
 	    <link href="css/bootstrap.min.css" rel="stylesheet">
 	    <link href="css/blog.css" rel="stylesheet">
+	    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+	    <script type="text/javascript" src="js/jquery.fancybox.pack.js"></script>  
+		<link rel="stylesheet" type="text/css" href="css/jquery.fancybox.css" />
 	</head>
 
 	<body>
@@ -39,6 +42,11 @@
 								<p class="blog-post-meta"><?=$fila['fecha']?></p>
 								<h3 class=""><?=$fila['subtitulo']?></h3>
 								<p><?=$fila['texto']?></p>
+								<?if (!empty($fila['nombre_img']) && !empty($fila['ruta'])): ?>
+									<div>
+										<a class="fancy" href="<?=$fila['ruta'].$fila['nombre_img'] ?>"><img src="<?=$fila['ruta'].$fila['nombre_img'] ?>"width="150"></a>
+									</div>
+								<?endif; ?>
 								<div class="boton">
 									<a href="modificar.php?id=<?=$fila['id']?>" class="btn btn-warning">Editar post</a>
 									<a input type="button" class="btn btn-danger" value="Mostrar" onclick="mostrar(<?=$fila['id']?>)">Eliminar post</a>
@@ -63,6 +71,10 @@
 			function ocultar(id){
 				document.getElementById('confirmacion_'+id).style.display = 'none';
 			}
+
+			$(document).ready(function(){  
+    		$(".fancy").fancybox({ });  
+			}); 
 	</script>
 	</body>
 </html>

@@ -40,7 +40,7 @@ class blog
 
 	public function view($id=null)
 	{
-		$sql = "SELECT posts.*, temas.nombre FROM posts LEFT JOIN temas ON posts.tema_id = temas.id WHERE posts.id=$id";
+		$sql = "SELECT posts.*, temas.nombre, imagenes.nombre_img, imagenes.ruta FROM posts LEFT JOIN temas ON posts.tema_id = temas.id LEFT JOIN imagenes ON posts.imagen_id = imagenes.id WHERE posts.id=$id";
 
 		if (!$resultado = $this->bd->query($sql)) 
 		{
