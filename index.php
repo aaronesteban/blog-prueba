@@ -69,6 +69,11 @@
 						<p class="blog-post-meta"><?=$blog->formatFecha($fila['fecha'])?></p>
 						<h3 class=""><?=$fila['subtitulo']?></h3>
 						<p><?=$fila['texto']?></p>
+						<?if (!empty($fila['nombre_img']) && !empty($fila['ruta'])): ?>
+							<div>
+								<img src="<?=$fila['ruta'].$fila['nombre_img'] ?>" height="100" width="150">
+							</div>
+						<?endif; ?>
 						<? if(isset($_SESSION['login'])): ?>
 							<div class="boton">
 								<a href="modificar.php?id=<?=$fila['id']?>" class="btn btn-warning">Editar post</a>

@@ -1,8 +1,6 @@
 <?php
 	include "base-datos.php";
 	$bd = new blog();
-	$rutaabsoluta = 'C:\xampp/htdocs/blog/img/';
-	$rutaweb = '/blog/img';
 
 	if (!$bd->isloged()) {
 		$_SESSION['msg'] = "No estás logueado";
@@ -13,13 +11,13 @@
 	if (!empty($posts)) 
 	{
 		if ($_FILES ['archivo']['error'] > 0) {
-			echo "Error:" .$_FILES ['archivo']['error'] ;	
+			$bd->insertar($posts);
 		}
 		else
 		{
 			$nombre = $_FILES['archivo']['name'];
-			move_uploaded_file($_FILES['archivo']['tmp_name'], $ruta .$nombre);
-			$bd->insertar($posts,$rutaweb,$nombre);
+			move_uploaded_file($_FILES['archivo']['tmp_name'], $bd->rutaabsoluta.$nombre);
+			$bd->insertar($posts, $bd->rutaweb, $nombre);
 		}
 	}
 	$tema = $bd->gettemas();

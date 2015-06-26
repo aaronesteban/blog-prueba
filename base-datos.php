@@ -7,6 +7,10 @@ class blog
 {
 	public $bd;
 
+	public $rutaabsoluta = 'C:\xampp/htdocs/blog/img/';
+	public $rutaweb = 'img/';
+
+
 	function __construct()
 	{
 
@@ -24,7 +28,7 @@ class blog
 
 	public function listar()
 	{
-		$sql = "SELECT posts.*, temas.nombre FROM posts LEFT JOIN temas ON posts.tema_id = temas.id order by posts.id desc";
+		$sql = "SELECT posts.*, temas.nombre, imagenes.nombre_img, imagenes.ruta FROM posts LEFT JOIN temas ON posts.tema_id = temas.id LEFT JOIN imagenes ON posts.imagen_id = imagenes.id order by posts.id desc";
 
 		if (!$resultado = $this->bd->query($sql)) 
 		{
@@ -46,18 +50,26 @@ class blog
 
 	}
 
-	public function insertar($posts,$rutaweb,$nombre)
+	public function insertar($posts,$rutaweb=null,$nombre=null)
 	{
 
-		$sql2 = "INSERT INTO imagenes(nombre, ruta) VALUES ('$nombre', '$rutaweb')";
-		
- 		$this->bd->query($sql2)
- 		$imagen_id = $this->bd->insert_id;
+		if (!empty($nombre) && !empty($rutaweb)) {
+			$sql2 = "INSERT INTO imagenes(nombre_img, ruta) VALUES ('$nombre', '$rutaweb')";
+	 		$this->bd->query($sql2);
+	 		$imagen_id = $this->bd->insert_id;
 
-		$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id, imagen_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].", $imagen_id)";
-
-		if(! $this->bd->query($sql) || ! $this->bd->query($sql2)){
-		     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+			$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id, imagen_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].", $imagen_id)";
+			if(! $this->bd->query($sql)){
+			     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+			}
+		}
+		else
+		{
+			$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].")";
+			
+			if(! $this->bd->query($sql)){
+				die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+			}
 		}
 		header("Location: index.php");
 	}
@@ -75,7 +87,16 @@ class blog
 
 	public function eliminar($id)
 	{
-		$sql = "DELETE FROM posts WHERE id=$id";
+		
+		$sql = "SELECT imagenes.nombre_img FROM `posts` LEFT JOIN imagenes On posts.imagen_id=imagenes.id WHERE posts.id=$id";
+		$resultado = $this->bd->query($sql);
+		$nombre_img = $resultado->fetch_row();
+
+		if (!empty($nombre_img[0])) {
+			@unlink($this->rutaabsoluta.$nombre_img[0]);
+		}
+
+		$sql = "DELETE posts.*, imagenes.* FROM posts LEFT JOIN imagenes ON posts.imagen_id = imagenes.id WHERE posts.id=$id";
 
 		if(! $this->bd->query($sql)){
 		     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
