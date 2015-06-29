@@ -38,6 +38,15 @@ if (!empty($registro))
                         <td><input name="password1" required="required" type="password" /></td> 
                     </tr>
                     <tr>
+                        <td>Administrador:</td>
+                        <td>
+                            <SELECT name="admin"> 
+                            <OPTION VALUE=1> Sí
+                            <OPTION SELECTED VALUE=0> No
+                            </SELECT> 
+                        </td>
+                    </tr>
+                    <tr>
                         <td colspan="2"><input name="iniciar" type="submit" value="Registrarse" /></td>
                     </tr>
                 </table>

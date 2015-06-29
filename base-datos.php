@@ -28,7 +28,7 @@ class blog
 
 	public function listar()
 	{
-		$sql = "SELECT posts.*, temas.nombre, imagenes.nombre_img, imagenes.ruta FROM posts LEFT JOIN temas ON posts.tema_id = temas.id LEFT JOIN imagenes ON posts.imagen_id = imagenes.id order by posts.id desc";
+		$sql = "SELECT posts.*, temas.nombre, imagenes.nombre_img, imagenes.ruta, videos.ruta_video FROM posts LEFT JOIN temas ON posts.tema_id = temas.id LEFT JOIN imagenes ON posts.imagen_id = imagenes.id LEFT JOIN videos ON posts.video_id = videos.id order by posts.id desc";
 
 		if (!$resultado = $this->bd->query($sql)) 
 		{
@@ -40,7 +40,7 @@ class blog
 
 	public function view($id=null)
 	{
-		$sql = "SELECT posts.*, temas.nombre, imagenes.nombre_img, imagenes.ruta FROM posts LEFT JOIN temas ON posts.tema_id = temas.id LEFT JOIN imagenes ON posts.imagen_id = imagenes.id WHERE posts.id=$id";
+		$sql = "SELECT posts.*, temas.nombre, imagenes.nombre_img, imagenes.ruta, videos.ruta_video FROM posts LEFT JOIN temas ON posts.tema_id = temas.id LEFT JOIN imagenes ON posts.imagen_id = imagenes.id LEFT JOIN videos ON posts.video_id = videos.id WHERE posts.id=$id";
 
 		if (!$resultado = $this->bd->query($sql)) 
 		{
@@ -52,23 +52,80 @@ class blog
 
 	public function insertar($posts,$rutaweb=null,$nombre=null)
 	{
+		$user_id = $_SESSION['user'];
 
-		if (!empty($nombre) && !empty($rutaweb)) {
-			$sql2 = "INSERT INTO imagenes(nombre_img, ruta) VALUES ('$nombre', '$rutaweb')";
-	 		$this->bd->query($sql2);
+		if (!empty($posts['video'])) 
+		{
+			$video = explode("=", $posts['video']);
+			$video = $video[1];
+
+			$sql = "INSERT INTO videos(ruta_video) VALUES ('$video')";
+	 		$this->bd->query($sql);
+	 		$video_id = $this->bd->insert_id;
+		}
+		if (!empty($nombre) && !empty($rutaweb)) 
+		{
+			$sql = "SELECT imagenes.nombre_img FROM `imagenes` WHERE imagenes.nombre_img = '$nombre'";
+			$resultado = $this->bd->query($sql);
+			
+			$resultado->num_rows === 1;
+			$existe = $resultado->fetch_row();
+			$existe = $existe[0];
+			$nombre_img = $nombre;
+			$nombre = explode(".", $nombre);
+			$cont =1;
+
+			while ($nombre_img == $existe ) {
+				$nombre_img = explode(".", $nombre);
+				$nombre_img = $nombre[0].$cont.".".$nombre[1];
+				$sql = "SELECT imagenes.nombre_img FROM `imagenes` WHERE imagenes.nombre_img = '$nombre_img'";
+				$resultado = $this->bd->query($sql);
+				$resultado->num_rows === 1;
+				$existe = $resultado->fetch_row();
+				$existe = $existe[0];
+				$cont++;
+			}
+
+			$nombre = $nombre_img;
+
+			move_uploaded_file($_FILES['archivo']['tmp_name'], $this->rutaabsoluta.$nombre);
+
+			$sql = "INSERT INTO imagenes(nombre_img, ruta) VALUES ('$nombre', '$rutaweb')";
+	 		$this->bd->query($sql);
 	 		$imagen_id = $this->bd->insert_id;
 
-			$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id, imagen_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].", $imagen_id)";
-			if(! $this->bd->query($sql)){
-			     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
-			}
+	 		if (!empty($video_id)) 
+	 		{
+				$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id, imagen_id, user_id, video_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].", $imagen_id, $user_id, $video_id)";
+				if(! $this->bd->query($sql)){
+				     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+				}
+	 		}
+	 		else
+	 		{
+	 			$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id, imagen_id, user_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].", $imagen_id, $user_id)";
+				if(! $this->bd->query($sql)){
+				     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+				}
+	 		}
 		}
 		else
 		{
-			$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].")";
-			
-			if(! $this->bd->query($sql)){
-				die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+			if (!empty($video_id)) 
+			{
+				$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id, user_id, video_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].", $user_id, $video_id)";
+				
+				if(! $this->bd->query($sql)){
+					die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+				}
+			}
+			else
+			{
+				$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id, user_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].", $user_id)";
+				
+				if(! $this->bd->query($sql)){
+					die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+				}
 			}
 		}
 		header("Location: index.php");
@@ -76,11 +133,22 @@ class blog
 
 	public function modificar($post)
 	{
+		
+		$sql = "SELECT posts.user_id FROM `posts` WHERE id = {$post['id']} ";
+		$resultado = $this->bd->query($sql);
+		$resultado = $resultado->fetch_assoc();
 
-		$sql = "UPDATE posts SET posts.titulo='{$post['titulo']}', posts.subtitulo = '{$post['subtitulo']}', posts.texto = '{$post['texto']}', posts.tema_id = '{$post['tema_id']}' WHERE posts.id={$post['id']} ";
+		if ($_SESSION['user'] == $resultado['user_id']) 
+		{
+			$sql = "UPDATE posts SET posts.titulo='{$post['titulo']}', posts.subtitulo = '{$post['subtitulo']}', posts.texto = '{$post['texto']}', posts.tema_id = '{$post['tema_id']}' WHERE posts.id={$post['id']} ";
 
-		if(! $this->bd->query($sql)){
-		     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+			if(! $this->bd->query($sql)){
+			     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+			}
+		}
+		else
+		{
+			$_SESSION['msg'] = "No puedes modificar un post que no es tuyo.";
 		}
 		header("Location: view.php?id={$post['id']}"); 
 	}
@@ -88,25 +156,36 @@ class blog
 	public function eliminar($id)
 	{
 		
-		$sql = "SELECT imagenes.nombre_img FROM `posts` LEFT JOIN imagenes On posts.imagen_id=imagenes.id WHERE posts.id=$id";
+		$sql = "SELECT posts.user_id FROM `posts` WHERE id = $id ";
 		$resultado = $this->bd->query($sql);
-		$nombre_img = $resultado->fetch_row();
+		$resultado = $resultado->fetch_assoc();
 
-		if (!empty($nombre_img[0])) {
-			@unlink($this->rutaabsoluta.$nombre_img[0]);
+		if ($_SESSION['user'] == $resultado['user_id']) 
+		{	
+			$sql = "SELECT imagenes.nombre_img FROM `posts` LEFT JOIN imagenes On posts.imagen_id=imagenes.id WHERE posts.id=$id";
+			$resultado = $this->bd->query($sql);
+			$nombre_img = $resultado->fetch_row();
+
+			if (!empty($nombre_img[0])) {
+				@unlink($this->rutaabsoluta.$nombre_img[0]);
+			}
+
+			$sql = "DELETE posts.*, imagenes.* FROM posts LEFT JOIN imagenes ON posts.imagen_id = imagenes.id WHERE posts.id=$id";
+
+			if(! $this->bd->query($sql)){
+			     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+			}
 		}
-
-		$sql = "DELETE posts.*, imagenes.* FROM posts LEFT JOIN imagenes ON posts.imagen_id = imagenes.id WHERE posts.id=$id";
-
-		if(! $this->bd->query($sql)){
-		     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+		else
+		{
+			$_SESSION['msg'] = "No puedes eliminar un post que no es tuyo.";
 		}
 		header("Location: index.php");
 	}
 
 	public function listarfecha($fecha)
 	{
-		$sql = "SELECT posts.*, temas.nombre FROM posts LEFT JOIN temas ON posts.tema_id = temas.id WHERE date_format(fecha, '%m-%Y') = '$fecha' ";
+		$sql = "SELECT posts.*, temas.nombre FROM posts LEFT JOIN temas ON posts.tema_id = temas.id WHERE date_format(fecha, '%m-%Y') = '$fecha' ORDER BY `posts`.`fecha` DESC ";
 
 		$resultado = $this->bd->query($sql);
 		if (!$resultado) 
@@ -196,14 +275,15 @@ class blog
 		{
 			$user = $resultado->fetch_row();
 			$_SESSION['login'] = $user[3];
+			$_SESSION['admin'] = $user[4];
+			$_SESSION['user'] = $user[0];
 			header("Location: index.php");
-			if ($usuario == 'aaron' && $password == 'aaronesteban') {
-				$_SESSION['login'] = $user[1];
-			}
 		}
 		else
 		{
 			unset($_SESSION['login']);
+			unset($_SESSION['admin']);
+			unset($_SESSION['user']);
 			$_SESSION['msg'] = "Usuario o contraseña incorrectos.";
 		}
 	
@@ -213,6 +293,8 @@ class blog
 	{
 
 		unset($_SESSION['login']);
+		unset($_SESSION['admin']);
+		unset($_SESSION['user']);
 		header("Location: index.php");
 	}
 
@@ -230,18 +312,40 @@ class blog
 
 	public function registrarse($registro)
 	{
+		$sql = "SELECT * FROM `users` WHERE users.user = '$registro[usuario]'";
 
-		if ($registro['password'] !== $registro['password1']) {
-			$_SESSION['msg'] = "Las contraseñas no coinciden.";
+		if(!$resultado = $this->bd->query($sql)){
+			    die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+			}
+
+		$resultado->num_rows === 1;
+		$existe = $resultado->fetch_row();
+		
+		if (!empty($existe)) {
+			$_SESSION['msg'] = "El usuario ya existe.";
+
 		}
+
 		else
 		{
-			$sql = "INSERT INTO users(nombre, user, password) VALUES ('".$registro['nombre']."','". $registro['usuario']."','".$registro['password']."')";
-
-			if(!$this->bd->query($sql)){
-			     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+			if ($registro['password'] !== $registro['password1'] || $registro['password'] == $registro['usuario']) 
+			{
+				if ($registro['password'] !== $registro['password1']) {
+					$_SESSION['msg'] = "Las contraseñas no coinciden.";
+				}
+				if ($registro['password'] == $registro['usuario']) {
+					$_SESSION['msg'] = "El usuario y la contraseña no pueden ser iguales.";
+				}
 			}
-			header("Location: index.php");
-		}
+			else
+			{
+				$sql = "INSERT INTO users(nombre, user, password, admin) VALUES ('".$registro['nombre']."','". $registro['usuario']."','".$registro['password']."', '".$registro['admin']."')";
+
+				if(!$this->bd->query($sql)){
+				     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+				}
+				header("Location: index.php");
+			}
+		} 	
 	}
 }

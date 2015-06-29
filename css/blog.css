@@ -17,6 +17,7 @@
 } 
 .container{
 	background-color: #A0A0A0;
+	width: 95%;
 }
 .container h1 {
 	color: #004C99;

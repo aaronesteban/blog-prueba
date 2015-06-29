@@ -27,6 +27,10 @@
 		<div class="container">
 
 			<a href="index.php"><h1>Blog con php y mySQL</h1></a>
+			<? if (isset($_SESSION['msg'])): ?>
+			<div class="alert alert-danger" role="alert"><?=$_SESSION['msg']?></div>
+			<? unset($_SESSION['msg']); ?>
+			<? endif; ?>
 
 			<div class="row">
 
@@ -47,15 +51,24 @@
 										<a class="fancy" href="<?=$fila['ruta'].$fila['nombre_img'] ?>"><img src="<?=$fila['ruta'].$fila['nombre_img'] ?>"width="150"></a>
 									</div>
 								<?endif; ?>
-								<div class="boton">
-									<a href="modificar.php?id=<?=$fila['id']?>" class="btn btn-warning">Editar post</a>
-									<a input type="button" class="btn btn-danger" value="Mostrar" onclick="mostrar(<?=$fila['id']?>)">Eliminar post</a>
-									<div id="confirmacion_<?=$fila['id']?>" class="confirmacion" style='display:none;'>
-										<span>¿Está seguro de que desea eliminar este post?</span>
-										<a href="eliminar.php?id=<?=$fila['id']?>" class="btn btn-danger">Si</a>
-										<a class="btn btn-warning" class ="no" onclick="ocultar(<?=$fila['id']?>)">No</a>
+								<?if (!empty($fila['ruta_video'])): ?>
+									<div>
+										<iframe width="200" src="https://www.youtube.com/embed/<?=($fila['ruta_video']); ?>" frameborder="0" allowfullscreen class="fancy"></iframe>
 									</div>
-								</div>
+								<?endif; ?>
+								<? if(isset($_SESSION['login'])): ?> 
+									<? if ($_SESSION['user'] == $fila['user_id'] || $_SESSION['admin'] === '1'): ?>
+										<div class="boton">
+											<a href="modificar.php?id=<?=$fila['id']?>" class="btn btn-warning">Editar post</a>
+											<a input type="button" class="btn btn-danger" value="Mostrar" onclick="mostrar(<?=$fila['id']?>)">Eliminar post</a>
+											<div id="confirmacion_<?=$fila['id']?>" class="confirmacion" style='display:none;'>
+												<span>¿Está seguro de que desea eliminar este post?</span>
+												<a href="eliminar.php?id=<?=$fila['id']?>" class="btn btn-danger">Si</a>
+												<a class="btn btn-warning" class ="no" onclick="ocultar(<?=$fila['id']?>)">No</a>
+											</div>
+										</div>
+									<? endif; ?>
+								<? endif; ?>
 						<?php endwhile; ?>
 				</div>
 				<a href="index.php" class="btn btn-danger">Volver a Inicio</a>			

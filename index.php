@@ -1,4 +1,4 @@
-<?php
+<?
 	include	"base-datos.php";
 
 	$blog = new blog();
@@ -60,7 +60,7 @@
 
 			<div class="col-sm-8 blog-main">
 
-				<?php while($fila = $posts->fetch_assoc()): ?>
+				<? while($fila = $posts->fetch_assoc()): ?>
 					<div class="blog-post">
 							<p>Tema: <strong> <?=$fila['nombre']?> </strong></p>
 						<h2 class="blog-post-title">
@@ -73,22 +73,29 @@
 						<p><?=$fila['texto']?></p>
 						<?if (!empty($fila['nombre_img']) && !empty($fila['ruta'])): ?>
 							<div>
-								<a class="fancy" href="<?=$fila['ruta'].$fila['nombre_img'] ?>"><img src="<?=$fila['ruta'].$fila['nombre_img'] ?>" height="100" width="150"></a>
+								<a class="fancy" href="<?=$fila['ruta'].$fila['nombre_img'] ?>"><img src="<?=$fila['ruta'].$fila['nombre_img'] ?>" width="150"></a>
 							</div>
 						<?endif; ?>
-						<? if(isset($_SESSION['login'])): ?>
-							<div class="boton">
-								<a href="modificar.php?id=<?=$fila['id']?>" class="btn btn-warning">Editar post</a>
-								<a input type="button" class="btn btn-danger" value="Mostrar" onclick="mostrar(<?=$fila['id']?>)">Eliminar post</a>
-								<div id="confirmacion_<?=$fila['id']?>" class="confirmacion" style='display:none;'>
-									<span>¿Está seguro de que desea eliminar este post?</span>
-									<a href="eliminar.php?id=<?=$fila['id']?>" class="btn btn-danger">Si</a>
-									<a class="btn btn-warning" class ="no" onclick="ocultar(<?=$fila['id']?>)">No</a>
-								</div>
+						<?if (!empty($fila['ruta_video'])): ?>
+							<div>
+								<iframe width="200" src="https://www.youtube.com/embed/<?=($fila['ruta_video']); ?>" frameborder="0" allowfullscreen class="fancy"></iframe>
 							</div>
+						<?endif; ?>
+						<? if(isset($_SESSION['login'])): ?> 
+							<? if ($_SESSION['user'] == $fila['user_id'] || $_SESSION['admin'] === '1'): ?>
+								<div class="boton">
+									<a href="modificar.php?id=<?=$fila['id']?>" class="btn btn-warning">Editar post</a>
+									<a input type="button" class="btn btn-danger" value="Mostrar" onclick="mostrar(<?=$fila['id']?>)">Eliminar post</a>
+									<div id="confirmacion_<?=$fila['id']?>" class="confirmacion" style='display:none;'>
+										<span>¿Está seguro de que desea eliminar este post?</span>
+										<a href="eliminar.php?id=<?=$fila['id']?>" class="btn btn-danger">Si</a>
+										<a class="btn btn-warning" class ="no" onclick="ocultar(<?=$fila['id']?>)">No</a>
+									</div>
+								</div>
+							<? endif; ?>
 						<? endif; ?>
 					</div>
-				<?php endwhile; ?>
+				<? endwhile; ?>
 	</div>
 	<?include "botones.php";?>
 	<div class="col-sm-3 col-sm-offset-1 blog-sidebar">
@@ -98,11 +105,11 @@
 		</div>
 		<div class="sidebar-module">
 			<h4>Archivos</h4>
-			<?php include "_lista.php" ?>
+			<? include "_lista.php" ?>
 		</div>
 		<div class="sidebar-module">
 			<h4>Filtrar</h4>
-			<?php include "_filtrar.php" ?>
+			<? include "_filtrar.php" ?>
 		</div>
 	</div>
 	<script type="text/javascript">

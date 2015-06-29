@@ -1,6 +1,6 @@
 <div class="insertar">
 	<? if(isset($_SESSION['login'])): ?>
-		<? if($_SESSION['login'] === 'aaron'): ?>
+		<? if($_SESSION['admin'] === '1'): ?>
 			<a href="registro.php" class="btn btn-success">Registrar</a>
 		<?endif?>
 		<a href="insertar.php" class="btn btn-success">Añadir Post</a>

@@ -16,7 +16,6 @@
 		else
 		{
 			$nombre = $_FILES['archivo']['name'];
-			move_uploaded_file($_FILES['archivo']['tmp_name'], $bd->rutaabsoluta.$nombre);
 			$bd->insertar($posts, $bd->rutaweb, $nombre);
 		}
 	}
@@ -62,6 +61,9 @@
 					</script>
 					<br/> <br/>
 					<input type="file" name="archivo" id="archivo"></input>
+					<br/> <br/>
+					<label for="video">Vídeo: </label>
+					<textarea cols='120' id='video' name='video' rows='1' placeholder= "Copie la url entera de youtube."></textarea>
 					<br/> <br/>
 					<input type="submit" value="Enviar">
 					<input type="reset">
