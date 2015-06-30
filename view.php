@@ -48,14 +48,19 @@
 								<p><?=$fila['texto']?></p>
 								<?if (!empty($fila['nombre_img']) && !empty($fila['ruta'])): ?>
 									<div>
-										<a class="fancy" href="<?=$fila['ruta'].$fila['nombre_img'] ?>"><img src="<?=$fila['ruta'].$fila['nombre_img'] ?>"width="150"></a>
+										<a class="fancy" href="<?=$fila['ruta'].$fila['nombre_img'] ?>"><img class ="imagen" src="<?=$fila['ruta'].$fila['nombre_img'] ?>"width="150"></a>
 									</div>
 								<?endif; ?>
 								<?if (!empty($fila['ruta_video'])): ?>
-									<div>
-										<iframe width="200" src="https://www.youtube.com/embed/<?=($fila['ruta_video']); ?>" frameborder="0" allowfullscreen class="fancy"></iframe>
+									<div class="video">
+										<iframe width="100%" src="https://www.youtube.com/embed/<?=($fila['ruta_video']); ?>" frameborder="0" allowfullscreen class="fancy"></iframe>
 									</div>
 								<?endif; ?>
+								<?if (!empty($fila['ruta_vimeo'])): ?>
+							<div class="video">
+								<iframe width="100%" src="//player.vimeo.com/video/<?=($fila['ruta_vimeo']); ?>" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+							</div>
+						<?endif; ?>
 								<? if(isset($_SESSION['login'])): ?> 
 									<? if ($_SESSION['user'] == $fila['user_id'] || $_SESSION['admin'] === '1'): ?>
 										<div class="boton">

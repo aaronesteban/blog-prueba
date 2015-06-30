@@ -30,11 +30,11 @@
 
     <!-- Bootstrap core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/blog.css" rel="stylesheet">
     
 	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
 	<script type="text/javascript" src="js/jquery.fancybox.pack.js"></script>  
 	<link rel="stylesheet" type="text/css" href="css/jquery.fancybox.css" />
+	<link href="css/blog.css" rel="stylesheet">
 </head>
 
 <body>
@@ -73,12 +73,17 @@
 						<p><?=$fila['texto']?></p>
 						<?if (!empty($fila['nombre_img']) && !empty($fila['ruta'])): ?>
 							<div>
-								<a class="fancy" href="<?=$fila['ruta'].$fila['nombre_img'] ?>"><img src="<?=$fila['ruta'].$fila['nombre_img'] ?>" width="150"></a>
+								<a class="fancy" href="<?=$fila['ruta'].$fila['nombre_img'] ?>"><img class ="imagen" src="<?=$fila['ruta'].$fila['nombre_img'] ?>"></a>
 							</div>
 						<?endif; ?>
 						<?if (!empty($fila['ruta_video'])): ?>
-							<div>
-								<iframe width="200" src="https://www.youtube.com/embed/<?=($fila['ruta_video']); ?>" frameborder="0" allowfullscreen class="fancy"></iframe>
+							<div class="video">
+								<iframe width="100%" src="https://www.youtube.com/embed/<?=($fila['ruta_video']); ?>" frameborder="0" allowfullscreen class="fancy"></iframe>
+							</div>
+						<?endif; ?>
+						<?if (!empty($fila['ruta_vimeo'])): ?>
+							<div class="video">
+								<iframe src="//player.vimeo.com/video/<?=($fila['ruta_vimeo']); ?>"width="100%" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 							</div>
 						<?endif; ?>
 						<? if(isset($_SESSION['login'])): ?> 
@@ -122,8 +127,14 @@
 			document.getElementById('confirmacion_'+id).style.display = 'none';
 		}
 
-		$(document).ready(function(){  
-    	$(".fancy").fancybox({ });  
+		$(document).ready(function(){
+	    	$(".fancy").fancybox({ });
+
+	    	$(window).resize(function(){
+		    	var width = $('.video').width();
+		    	height = width*3/4;
+		    	$('.video iframe').css({'height':height});	    		
+	    	});
 		});    
 	</script>
 </body>

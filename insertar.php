@@ -11,13 +11,16 @@
 	if (!empty($posts)) 
 	{
 		if ($_FILES ['archivo']['error'] > 0) {
-			$bd->insertar($posts);
+			
 		}
 		else
 		{
 			$nombre = $_FILES['archivo']['name'];
-			$bd->insertar($posts, $bd->rutaweb, $nombre);
+			$imagen_id = $bd->insertar_imagen($bd->rutaweb, $nombre);
 		}
+
+		$video_id = $bd->insertar_video($posts);
+		$bd->insertar($posts, $imagen_id, $video_id, $video_vimeo);
 	}
 	$tema = $bd->gettemas();
 ?>
@@ -62,8 +65,11 @@
 					<br/> <br/>
 					<input type="file" name="archivo" id="archivo"></input>
 					<br/> <br/>
-					<label for="video">Vídeo: </label>
-					<textarea cols='120' id='video' name='video' rows='1' placeholder= "Copie la url entera de youtube."></textarea>
+					<label for="video">Vídeo youtube: </label>
+					<textarea cols='120' id='video' name='video_youtube' rows='1' placeholder= "Copie la url entera de youtube."></textarea>
+					<br/> <br/>
+					<label for="video">Vídeo vimeo: </label>
+					<textarea cols='120' id='video_vimeo' name='video_vimeo' rows='1' placeholder= "Copie la url entera de vimeo."></textarea>
 					<br/> <br/>
 					<input type="submit" value="Enviar">
 					<input type="reset">

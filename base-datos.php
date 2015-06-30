@@ -23,12 +23,11 @@ class blog
 			die('Imposible conectar [' . $this->bd->connect_error . ']');
 		}
 
-
 	}
 
 	public function listar()
 	{
-		$sql = "SELECT posts.*, temas.nombre, imagenes.nombre_img, imagenes.ruta, videos.ruta_video FROM posts LEFT JOIN temas ON posts.tema_id = temas.id LEFT JOIN imagenes ON posts.imagen_id = imagenes.id LEFT JOIN videos ON posts.video_id = videos.id order by posts.id desc";
+		$sql = "SELECT posts.*, temas.nombre, imagenes.nombre_img, imagenes.ruta, videos.ruta_video, videos.ruta_vimeo FROM posts LEFT JOIN temas ON posts.tema_id = temas.id LEFT JOIN imagenes ON posts.imagen_id = imagenes.id LEFT JOIN videos ON posts.video_id = videos.id order by posts.id desc";
 
 		if (!$resultado = $this->bd->query($sql)) 
 		{
@@ -40,7 +39,7 @@ class blog
 
 	public function view($id=null)
 	{
-		$sql = "SELECT posts.*, temas.nombre, imagenes.nombre_img, imagenes.ruta, videos.ruta_video FROM posts LEFT JOIN temas ON posts.tema_id = temas.id LEFT JOIN imagenes ON posts.imagen_id = imagenes.id LEFT JOIN videos ON posts.video_id = videos.id WHERE posts.id=$id";
+		$sql = "SELECT posts.*, temas.nombre, imagenes.nombre_img, imagenes.ruta, videos.ruta_video, videos.ruta_vimeo FROM posts LEFT JOIN temas ON posts.tema_id = temas.id LEFT JOIN imagenes ON posts.imagen_id = imagenes.id LEFT JOIN videos ON posts.video_id = videos.id WHERE posts.id=$id";
 
 		if (!$resultado = $this->bd->query($sql)) 
 		{
@@ -50,19 +49,48 @@ class blog
 
 	}
 
-	public function insertar($posts,$rutaweb=null,$nombre=null)
+	public function insertar($posts, $imagen_id, $video_id, $video_vimeo)
 	{
 		$user_id = $_SESSION['user'];
 
-		if (!empty($posts['video'])) 
-		{
-			$video = explode("=", $posts['video']);
-			$video = $video[1];
 
-			$sql = "INSERT INTO videos(ruta_video) VALUES ('$video')";
-	 		$this->bd->query($sql);
-	 		$video_id = $this->bd->insert_id;
-		}
+ 		if (!empty($video_id) && !empty($imagen_id)) 
+ 		{
+			$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id, imagen_id, user_id, video_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].", $imagen_id, $user_id, $video_id)";
+			if(! $this->bd->query($sql)){
+			     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+ 			}
+ 		}
+ 		elseif (!empty($video_id) && empty($imagen_id)) 
+ 		{
+			$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id, user_id, video_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].", $user_id, $video_id)";
+			if(! $this->bd->query($sql)){
+			     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+			}
+ 		}
+ 		elseif (empty($video_id) && !empty($imagen_id)) 
+ 		{
+			$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id, imagen_id, user_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].", $imagen_id, $user_id)";
+			if(! $this->bd->query($sql)){
+			     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+			}
+ 		}
+ 		elseif (empty($video_id) && empty($imagen_id)) 
+ 		{
+			$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id, user_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].", $user_id)";
+			if(! $this->bd->query($sql)){
+			     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
+			}
+ 		}
+		
+		header("Location: index.php");
+	}
+
+	public function insertar_imagen($rutaweb=null,$nombre=null)
+	{
+
+		$imagen_id = NULL;
+
 		if (!empty($nombre) && !empty($rutaweb)) 
 		{
 			$sql = "SELECT imagenes.nombre_img FROM `imagenes` WHERE imagenes.nombre_img = '$nombre'";
@@ -75,7 +103,8 @@ class blog
 			$nombre = explode(".", $nombre);
 			$cont =1;
 
-			while ($nombre_img == $existe ) {
+			while ($nombre_img == $existe ) 
+			{
 				$nombre_img = explode(".", $nombre);
 				$nombre_img = $nombre[0].$cont.".".$nombre[1];
 				$sql = "SELECT imagenes.nombre_img FROM `imagenes` WHERE imagenes.nombre_img = '$nombre_img'";
@@ -93,42 +122,51 @@ class blog
 			$sql = "INSERT INTO imagenes(nombre_img, ruta) VALUES ('$nombre', '$rutaweb')";
 	 		$this->bd->query($sql);
 	 		$imagen_id = $this->bd->insert_id;
+		}
 
-	 		if (!empty($video_id)) 
-	 		{
-				$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id, imagen_id, user_id, video_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].", $imagen_id, $user_id, $video_id)";
-				if(! $this->bd->query($sql)){
-				     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
-				}
-	 		}
-	 		else
-	 		{
-	 			$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id, imagen_id, user_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].", $imagen_id, $user_id)";
-				if(! $this->bd->query($sql)){
-				     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
-				}
-	 		}
-		}
-		else
+	 		return $imagen_id;
+	}
+
+	public function insertar_video($posts)
+	{
+
+		$video_id = NULL;
+
+		$video_youtube = explode("=", $posts['video_youtube']);
+		$video_youtube = $video_youtube[1];
+
+		$video_vimeo = explode("/", $posts['video_vimeo']);
+		$video_vimeo = $video_vimeo[3];
+
+		if (!empty($posts['video_youtube']) && !empty($posts['video_vimeo'])) 
 		{
-			if (!empty($video_id)) 
-			{
-				$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id, user_id, video_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].", $user_id, $video_id)";
-				
-				if(! $this->bd->query($sql)){
-					die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
-				}
-			}
-			else
-			{
-				$sql = "INSERT INTO posts(titulo, subtitulo, texto, tema_id, user_id) VALUES ('".$posts['titulo']."','". $posts['subtitulo']."','".$posts['texto']."', ".$posts['tema_id'].", $user_id)";
-				
-				if(! $this->bd->query($sql)){
-					die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
-				}
-			}
+
+			$sql = "INSERT INTO videos(ruta_video, ruta_vimeo) VALUES ('$video_youtube', '$video_vimeo')";
+	 		$this->bd->query($sql);
+	 		$video_id = $this->bd->insert_id;
+
 		}
-		header("Location: index.php");
+
+		if (!empty($posts['video_youtube']) && empty($posts['video_vimeo'])) 
+		{
+
+			$sql = "INSERT INTO videos(ruta_video) VALUES ('$video_youtube')";
+	 		$this->bd->query($sql);
+	 		$video_id = $this->bd->insert_id;
+
+		}
+
+		if (empty($posts['video_youtube']) && !empty($posts['video_vimeo'])) 
+		{
+
+			$sql = "INSERT INTO videos(ruta_vimeo) VALUES ('$video_vimeo')";
+	 		$this->bd->query($sql);
+	 		$video_id = $this->bd->insert_id;
+
+		}
+
+	 	return $video_id;
+		
 	}
 
 	public function modificar($post)
@@ -170,7 +208,7 @@ class blog
 				@unlink($this->rutaabsoluta.$nombre_img[0]);
 			}
 
-			$sql = "DELETE posts.*, imagenes.* FROM posts LEFT JOIN imagenes ON posts.imagen_id = imagenes.id WHERE posts.id=$id";
+			$sql = "DELETE posts.*, imagenes.*, videos.* FROM posts LEFT JOIN imagenes ON posts.imagen_id = imagenes.id LEFT JOIN videos ON posts.video_id = videos.id WHERE posts.id=$id";
 
 			if(! $this->bd->query($sql)){
 			     die('Ocurrio un error ejecutando el query [' . $this->bd->error . ']');
@@ -252,7 +290,7 @@ class blog
 
 	public function busqueda($busqueda)
 	{
-		$sql = "SELECT posts.*, temas.nombre FROM posts LEFT JOIN temas ON posts.tema_id = temas.id WHERE texto LIKE '%$busqueda%' OR titulo LIKE '%$busqueda%' OR subtitulo LIKE '%$busqueda%' ORDER BY fecha DESC LIMIT 50";
+		$sql = "SELECT posts.*, temas.nombre FROM posts LEFT JOIN temas ON posts.tema_id = temas.id WHERE texto LIKE '%$busqueda%' OR titulo LIKE '%$busqueda%' OR subtitulo LIKE '%$busqueda%' ORDER BY posts.fecha DESC LIMIT 50";
 
 		if (!$resultado= $this->bd->query($sql)) 
 		{

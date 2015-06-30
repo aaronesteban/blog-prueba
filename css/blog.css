@@ -75,5 +75,12 @@
 .login td:nth-child(2){
 	margin-left: 30px;
 }
-
+.imagen{
+	width: 100%;
+	height: auto;
+	margin-bottom: 30px;
+}
+.video{
+	margin-bottom: 30px;
+}
 
