@@ -9,6 +9,7 @@ class blog
 
 	public $rutaabsoluta = 'C:\xampp/htdocs/blog/img/';
 	public $rutaweb = 'img/';
+	public $numeropost = 10;
 
 
 	function __construct()
@@ -25,9 +26,46 @@ class blog
 
 	}
 
-	public function listar()
+	public function contarposts($tipo=NULL, $parametro=NULL)
 	{
-		$sql = "SELECT posts.*, temas.nombre, imagenes.nombre_img, imagenes.ruta, videos.ruta_video, videos.ruta_vimeo FROM posts LEFT JOIN temas ON posts.tema_id = temas.id LEFT JOIN imagenes ON posts.imagen_id = imagenes.id LEFT JOIN videos ON posts.video_id = videos.id order by posts.id desc";
+		if ($tipo == 'fecha') {
+			$sql = "SELECT count(*) FROM posts WHERE date_format(fecha, '%m-%Y') = '$parametro' ORDER BY `posts`.`fecha`";
+		} 
+		elseif ($tipo == 'tema') {
+			$sql = "SELECT count(*) FROM posts WHERE posts.tema_id= $parametro";
+		}
+		elseif ($tipo == 'busqueda') {
+			$sql = "SELECT count(*) FROM posts WHERE texto LIKE '%$parametro%' OR titulo LIKE '%$parametro%' OR subtitulo LIKE '%$parametro%'";
+		}
+		else{
+			$sql = "SELECT count(*) FROM posts";
+		}
+		if (!$resultado = $this->bd->query($sql)) 
+		{
+			die ('Ocurrio un error ejecutando el query [' . $this->$bd->error .']');
+		}
+
+		$cont = $resultado->fetch_row()[0];
+
+		$cont = $cont/$this->numeropost;
+		
+		if ($cont > intval($cont)) {
+		 	$cont = intval($cont) + 1;
+		 	return $cont;
+		 } 
+		return $cont;
+	}
+
+	public function numerocomienzopost($page)
+	{
+		$comienzo = ($page * $this->numeropost - 10);
+		return $comienzo;
+	}
+
+	public function listar($comienzo=0)
+	{
+
+		$sql = "SELECT posts.*, temas.nombre, imagenes.nombre_img, imagenes.ruta, videos.ruta_video, videos.ruta_vimeo FROM posts LEFT JOIN temas ON posts.tema_id = temas.id LEFT JOIN imagenes ON posts.imagen_id = imagenes.id LEFT JOIN videos ON posts.video_id = videos.id order by posts.id desc limit $comienzo, $this->numeropost";
 
 		if (!$resultado = $this->bd->query($sql)) 
 		{
@@ -221,9 +259,9 @@ class blog
 		header("Location: index.php");
 	}
 
-	public function listarfecha($fecha)
+	public function listarfecha($fecha, $comienzo)
 	{
-		$sql = "SELECT posts.*, temas.nombre FROM posts LEFT JOIN temas ON posts.tema_id = temas.id WHERE date_format(fecha, '%m-%Y') = '$fecha' ORDER BY `posts`.`fecha` DESC ";
+		$sql = "SELECT posts.*, temas.nombre, imagenes.nombre_img, imagenes.ruta, videos.ruta_video, videos.ruta_vimeo FROM posts LEFT JOIN temas ON posts.tema_id = temas.id LEFT JOIN imagenes ON posts.imagen_id = imagenes.id LEFT JOIN videos ON posts.video_id = videos.id WHERE date_format(fecha, '%m-%Y') = '$fecha' ORDER BY `posts`.`fecha` DESC limit $comienzo, $this->numeropost";
 
 		$resultado = $this->bd->query($sql);
 		if (!$resultado) 
@@ -276,9 +314,9 @@ class blog
 		return $resultado;
 	}
 
-	public function listartema($tema_id)
+	public function listartema($tema_id, $comienzo)
 	{
-		$sql = "SELECT distinct posts.*, temas.nombre FROM posts INNER JOIN temas ON posts.tema_id=temas.id WHERE posts.tema_id= $tema_id ORDER BY posts.fecha DESC";
+		$sql = "SELECT distinct posts.*, temas.nombre, imagenes.nombre_img, imagenes.ruta, videos.ruta_video, videos.ruta_vimeo FROM posts LEFT JOIN temas ON posts.tema_id = temas.id LEFT JOIN imagenes ON posts.imagen_id = imagenes.id LEFT JOIN videos ON posts.video_id = videos.id WHERE posts.tema_id= $tema_id ORDER BY posts.fecha DESC limit $comienzo, $this->numeropost";
 
 		if (!$resultado= $this->bd->query($sql)) 
 		{
@@ -288,9 +326,9 @@ class blog
 
 	}
 
-	public function busqueda($busqueda)
+	public function busqueda($busqueda, $comienzo)
 	{
-		$sql = "SELECT posts.*, temas.nombre FROM posts LEFT JOIN temas ON posts.tema_id = temas.id WHERE texto LIKE '%$busqueda%' OR titulo LIKE '%$busqueda%' OR subtitulo LIKE '%$busqueda%' ORDER BY posts.fecha DESC LIMIT 50";
+		$sql = "SELECT posts.*, temas.nombre, imagenes.nombre_img, imagenes.ruta, videos.ruta_video, videos.ruta_vimeo FROM posts LEFT JOIN temas ON posts.tema_id = temas.id LEFT JOIN imagenes ON posts.imagen_id = imagenes.id LEFT JOIN videos ON posts.video_id = videos.id WHERE texto LIKE '%$busqueda%' OR titulo LIKE '%$busqueda%' OR subtitulo LIKE '%$busqueda%' ORDER BY posts.fecha DESC limit $comienzo, $this->numeropost";
 
 		if (!$resultado= $this->bd->query($sql)) 
 		{

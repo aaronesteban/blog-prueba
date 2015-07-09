@@ -53,7 +53,7 @@
 								<?endif; ?>
 								<?if (!empty($fila['ruta_video'])): ?>
 									<div class="video">
-										<iframe width="100%" src="https://www.youtube.com/embed/<?=($fila['ruta_video']); ?>" frameborder="0" allowfullscreen class="fancy"></iframe>
+										<iframe width="100%" src="https://www.youtube.com/embed/<?=($fila['ruta_video']); ?>" frameborder="0" allowfullscreen></iframe>
 									</div>
 								<?endif; ?>
 								<?if (!empty($fila['ruta_vimeo'])): ?>
@@ -91,7 +91,14 @@
 			}
 
 			$(document).ready(function(){  
-    		$(".fancy").fancybox({ });  
+    			$(".fancy").fancybox({ });  
+    			
+    			$(window).resize(function(){
+		    		var width = $('.video').width();
+		    		height = width*3/4;
+		    		$('.video iframe').css({'height':height});	    		
+	    		});
+	    		$(window).resize();
 			}); 
 	</script>
 	</body>

@@ -2,19 +2,29 @@
 	include	"base-datos.php";
 
 	$blog = new blog();
-	if (isset($_GET['fecha']) || isset($_GET['tema']) || isset($_POST['busqueda'])) {
-		if (isset($_GET['fecha'])) {
-		$posts = $blog->listarfecha($_GET['fecha']);
-		}
-		elseif(isset($_GET['tema'])){
-			$posts = $blog->listartema($_GET['tema']);
-		}
-		elseif(isset($_POST['busqueda'])){
-			$posts = $blog->busqueda($_POST['busqueda']);
-		}
+	if (empty($_GET['page'])) {
+		$page = 1;
+	} 
+	else {
+		$page = $_GET['page'];
+	}
+
+	$comienzo = $blog->numerocomienzopost($page);
+	if (isset($_GET['fecha'])) {
+		$cont = $blog->contarposts('fecha',$_GET['fecha']);
+		$posts = $blog->listarfecha($_GET['fecha'], $comienzo);
+	}
+	elseif(isset($_GET['tema'])){
+		$cont = $blog->contarposts('tema',$_GET['tema']);
+		$posts = $blog->listartema($_GET['tema'], $comienzo);
+	}
+	elseif(isset($_POST['busqueda'])){
+		$cont = $blog->contarposts('busqueda',$_POST['busqueda']);
+		$posts = $blog->busqueda($_POST['busqueda'], $comienzo);
 	}
 	else{
-		$posts = $blog->listar();
+		$cont = $cont = $blog->contarposts();
+		$posts = $blog->listar($comienzo);
 	}
  ?>
 <!DOCTYPE html>
@@ -39,8 +49,9 @@
 
 <body>
 	<div class="container">
-
-		<a href="index.php"><h1>Blog con php y mySQL</h1></a>
+		<header>
+			<a href="index.php"><h1>Blog con php y mySQL</h1></a>
+		</header>
 
 		<? if (isset($_SESSION['msg'])): ?>
 			<div class="alert alert-danger" role="alert"><?=$_SESSION['msg']?></div>
@@ -78,7 +89,7 @@
 						<?endif; ?>
 						<?if (!empty($fila['ruta_video'])): ?>
 							<div class="video">
-								<iframe width="100%" src="https://www.youtube.com/embed/<?=($fila['ruta_video']); ?>" frameborder="0" allowfullscreen class="fancy"></iframe>
+								<iframe width="100%" src="https://www.youtube.com/embed/<?=($fila['ruta_video']); ?>" frameborder="0" allowfullscreen></iframe>
 							</div>
 						<?endif; ?>
 						<?if (!empty($fila['ruta_vimeo'])): ?>
@@ -101,22 +112,27 @@
 						<? endif; ?>
 					</div>
 				<? endwhile; ?>
-	</div>
-	<?include "botones.php";?>
-	<div class="col-sm-3 col-sm-offset-1 blog-sidebar">
-		<div class=" sidebar-module sidebar-module-insert">
-			<h4>Información</h4>
-			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec dapibus rhoncus pretium. In eget accumsan enim. Nunc vestibulum ultricies sapien. Donec eu mauris tincidunt, volutpat tellus quis, faucibus tortor.</p>
+			</div>
+			<?include "botones.php";?>
+			<div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+				<div class=" sidebar-module sidebar-module-insert">
+					<h4>Información</h4>
+					<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec dapibus rhoncus pretium. In eget accumsan enim. Nunc vestibulum ultricies sapien. Donec eu mauris tincidunt, volutpat tellus quis, faucibus tortor.</p>
+				</div>
+				<div class="sidebar-module">
+					<h4>Archivos</h4>
+					<? include "_lista.php" ?>
+				</div>
+				<div class="sidebar-module">
+					<h4>Filtrar</h4>
+					<? include "_filtrar.php" ?>
+				</div>
+			</div>
 		</div>
-		<div class="sidebar-module">
-			<h4>Archivos</h4>
-			<? include "_lista.php" ?>
+		<div class="pagina">	
+			<?include "paginas.php";?>
 		</div>
-		<div class="sidebar-module">
-			<h4>Filtrar</h4>
-			<? include "_filtrar.php" ?>
-		</div>
-	</div>
+	</div>	
 	<script type="text/javascript">
 		function mostrar(id){
 			document.getElementById('confirmacion_'+id).style.display = 'block';
@@ -135,6 +151,7 @@
 		    	height = width*3/4;
 		    	$('.video iframe').css({'height':height});	    		
 	    	});
+	    	$(window).resize();
 		});    
 	</script>
 </body>
